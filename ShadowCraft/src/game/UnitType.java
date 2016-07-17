@@ -2,7 +2,7 @@ package game;
 
 public enum UnitType {
 
-    BASIC_RANGED(100, 50, 2, 3, 0, 150, "ball");
+    BASIC_RANGED(20, 200, 2, 3, 0, 150, "ball");
 
     public final int maxHealth;
     public final double range;
@@ -11,7 +11,6 @@ public enum UnitType {
     public final int armor;
     public final double moveSpeed;
     public final String spriteName;
-    //sprite
     //cost
 
     private UnitType(int maxHealth, double range, double attackSpeed, int damage, int armor, double moveSpeed, String spriteName) {
