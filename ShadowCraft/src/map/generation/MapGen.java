@@ -9,6 +9,10 @@ package map.generation;
  *
  * @author Kosmic
  */
-public class mapGen {
+public class MapGen {
     
+    public MapGen(){
+        
+        //Arbeit Macht Frei
+    }
 }

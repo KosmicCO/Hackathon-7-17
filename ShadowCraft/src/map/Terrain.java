@@ -11,15 +11,17 @@ package map;
  */
 public class Terrain {
 
-    private int mWidth;
-    private int mHeight;
+    private final int mWidth;
+    private final int mHeight;
     private Tile[][] terMap;
-
-    public Terrain(int width, int height) {
-
-        mWidth = width;
-        mHeight = height;
-        terMap = new Tile[width][height];
+    private int seed;
+   
+    public Terrain(Tile[][] map, int seed){
+        
+        terMap = map;
+        mWidth = map.length;
+        mHeight = map[0].length;
+        this.seed = seed;
     }
 
     public int getWidth() {
@@ -30,10 +32,24 @@ public class Terrain {
     public int getHeight() {
         
         return mHeight;
-    }
-
-    public Tile[][] getMap() {
+    }  
+    
+    public int getSeed(){
         
-        return terMap;
-    }   
+        return seed;
+    }
+    
+    public void addObject(int x, int y, Tile[][] obj){
+        
+        for (int i = 0; i < obj.length; i++) {
+            
+            for (int j = 0; j < obj[0].length; j++) {
+                
+                if(obj[i][j] != null){
+                    
+                    terMap[i + x][j + y] = obj[i][j];
+                }
+            }
+        }
+    }
 }
