@@ -14,12 +14,14 @@ public class Terrain {
     private int mWidth;
     private int mHeight;
     private Tile[][] terMap;
-
-    public Terrain(int width, int height) {
-
-        mWidth = width;
-        mHeight = height;
-        terMap = new Tile[width][height];
+    private int seed;
+   
+    public Terrain(Tile[][] map, int seed){
+        
+        terMap = map;
+        mWidth = map.length;
+        mHeight = map[0].length;
+        this.seed = seed;
     }
 
     public int getWidth() {
@@ -36,4 +38,9 @@ public class Terrain {
         
         return terMap;
     }   
+    
+    public int getSeed(){
+        
+        return seed;
+    }
 }
