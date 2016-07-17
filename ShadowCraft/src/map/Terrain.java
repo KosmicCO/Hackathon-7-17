@@ -11,8 +11,8 @@ package map;
  */
 public class Terrain {
 
-    private int mWidth;
-    private int mHeight;
+    private final int mWidth;
+    private final int mHeight;
     private Tile[][] terMap;
     private int seed;
    
@@ -32,15 +32,24 @@ public class Terrain {
     public int getHeight() {
         
         return mHeight;
-    }
-
-    public Tile[][] getMap() {
-        
-        return terMap;
-    }   
+    }  
     
     public int getSeed(){
         
         return seed;
+    }
+    
+    public void addObject(int x, int y, Tile[][] obj){
+        
+        for (int i = 0; i < obj.length; i++) {
+            
+            for (int j = 0; j < obj[0].length; j++) {
+                
+                if(obj[i][j] != null){
+                    
+                    terMap[i + x][j + y] = obj[i][j];
+                }
+            }
+        }
     }
 }
