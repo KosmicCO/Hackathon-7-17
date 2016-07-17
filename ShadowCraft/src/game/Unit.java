@@ -33,17 +33,16 @@ public class Unit extends RegisteredEntity {
                 }
             });
         });
-//        Core.update.forEach(dt -> {
-//            System.out.println(boxStart.o);
-//            System.out.println(drawingBox.get());
-//            System.out.println(Input.getMouse().subtract(boxStart.o).lengthSquared() > 10);
-//            System.out.println(Input.mouseSignal(0).get());
-//        });
+
+        Input.whenMouse(1, true).onEvent(() -> {
+            selected.forEach(u -> u.goal.set(Input.getMouse()));
+        });
     }
 
     public Signal<Vec2> position, velocity;
     public Signal<Double> rotation;
-    public Vec2 size;
+    public Signal<Vec2> goal = new Signal(null);
+    public Vec2 size = new Vec2(20);
     public final UnitType type;
 
     public Unit(UnitType type) {
@@ -60,6 +59,17 @@ public class Unit extends RegisteredEntity {
         Core.render.onEvent(() -> {
             if (selected.contains(this)) {
                 Graphics2D.drawEllipse(position.get(), size, WHITE, 20);
+            }
+        });
+
+        Core.update.forEach(dt -> {
+            if (goal.get() != null) {
+                if (goal.get().subtract(position.get()).lengthSquared() < 15) {
+                    velocity.set(new Vec2(0));
+                    goal.set((Vec2) null);
+                } else {
+                    velocity.set(goal.get().subtract(position.get()).withLength(type.moveSpeed));
+                }
             }
         });
     }

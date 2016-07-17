@@ -2,7 +2,7 @@ package game;
 
 public enum UnitType {
 
-    BASIC_RANGED(100, 50, 2, 3, 0, 15, "ball");
+    BASIC_RANGED(100, 50, 2, 3, 0, 150, "ball");
 
     public final int maxHealth;
     public final double range;
