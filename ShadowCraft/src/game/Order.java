@@ -1,5 +1,7 @@
 package game;
 
+import networking.Client;
+import static networking.MessageType.UPDATE_UNIT_HEALTH;
 import util.Vec2;
 
 public abstract class Order {
@@ -78,8 +80,8 @@ public abstract class Order {
                     //attack
                     int damage = Math.max(u.type.damage - target.type.armor, 1);
                     target.health.edit(h -> h - damage);
-                    if (target.health.get() < 0) {
-                        target.destroy();
+                    if (u.unitTeam == Unit.myTeam) {
+                        Client.sendMessage(UPDATE_UNIT_HEALTH, target.id, target.health.get());
                     }
                 }
             }
