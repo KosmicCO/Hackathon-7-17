@@ -14,12 +14,12 @@ public class Tile {
     public static final int RESOLUTION = 32;
 
     private boolean solid;
-    private int speed;
+    private double speed;
     private boolean opaque;
-    private int penetrability;
+    private double penetrability;
     private String spriteName;
-
-    public Tile(boolean solid, int speed, boolean opaque, int penetrability, String spriteName) {
+    
+    public Tile(boolean solid, double speed, boolean opaque, double penetrability, String spriteName) {
 
         this.solid = solid;
         this.speed = speed;
@@ -27,13 +27,25 @@ public class Tile {
         this.penetrability = penetrability;
         this.spriteName = spriteName;
     }
+    
+    @Override
+    public boolean equals(Object o){
+        
+        if(o instanceof Tile){
+            
+            Tile t = (Tile) o;
+            return t.solid == solid && t.speed == speed && t.opaque == opaque && t.penetrability == penetrability;
+        }
+        
+        return false;
+    }
 
     public boolean isSolid() {
 
         return solid;
     }
 
-    public int getSpeed() {
+    public double getSpeed() {
 
         return speed;
     }
@@ -43,7 +55,7 @@ public class Tile {
         return opaque;
     }
 
-    public int getPenetrability() {
+    public double getPenetrability() {
 
         return penetrability;
     }
@@ -53,7 +65,7 @@ public class Tile {
         this.solid = solid;
     }
 
-    public void setSpeed(int speed) {
+    public void setSpeed(double speed) {
 
         this.speed = speed;
     }
@@ -63,7 +75,7 @@ public class Tile {
         this.opaque = opaque;
     }
 
-    public void setPenetrability(int penetrability) {
+    public void setPenetrability(double penetrability) {
 
         this.penetrability = penetrability;
     }

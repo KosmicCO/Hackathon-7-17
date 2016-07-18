@@ -12,14 +12,15 @@ package map;
 public class Terrain {
 
     public static Terrain terrain;
+    public static Terrain terrainVis;
+    public static final int VISION_RANGE = 10;
 
     private final int mWidth;
     private final int mHeight;
-    private Tile[][] terMap;
-    private int seed;
+    private final Tile[][] terMap;
+    private final int seed;
 
     public Terrain(Tile[][] map, int seed) {
-        terrain = this;
         terMap = map;
         mWidth = map.length;
         mHeight = map[0].length;
@@ -41,7 +42,55 @@ public class Terrain {
         return seed;
     }
 
-    public void addObject(int x, int y, Tile[][] obj) {
+    public double[][] getSpeedMap() {
+
+        double[][] svr = new double[mWidth][mHeight];
+
+        for (int i = 0; i < mWidth; i++) {
+
+            for (int j = 0; j < mHeight; j++) {
+
+                Tile t = terMap[i][j];
+                double speed = t.getSpeed();
+                svr[i][j] = speed > 0 ? speed : (t instanceof HealthTile ? 0 : -1);
+            }
+        }
+
+        return svr;
+    }
+    
+    public static boolean updateTerrain(int x, int y){
+        
+        boolean changed = false;
+        
+        for (int i = 0; i < VISION_RANGE * 2 + 1; i++) {
+            
+            for (int j = 0; j < VISION_RANGE * 2 + 1; j++) {
+                
+                if(i - VISION_RANGE + x >= 0 && j - VISION_RANGE + y >= 0 && i - VISION_RANGE 
+                        + x < terrain.mWidth && j - VISION_RANGE + y < terrain.mHeight){
+                    
+                    Tile t = terrain.terMap[i - VISION_RANGE + x][j - VISION_RANGE + y];
+                    Tile tv = terrainVis.terMap[i - VISION_RANGE + x][j - VISION_RANGE + y];
+                    
+                    if(!t.equals(tv)){
+                        
+                        terrainVis.terMap[i - VISION_RANGE + x][j - VISION_RANGE + y] = terrain.terMap[i - VISION_RANGE + x][j - VISION_RANGE + y];
+                        changed = true;
+                    }
+                    
+                    if(!t.getSpriteName().equals(tv.getSpriteName())){
+                            
+                            terrainVis.terMap[i - VISION_RANGE + x][j - VISION_RANGE + y] = terrain.terMap[i - VISION_RANGE + x][j - VISION_RANGE + y];
+                    }
+                }
+            }
+        }
+        
+        return changed;
+    }
+
+    public static void addObject(int x, int y, Tile[][] obj) {
 
         for (int i = 0; i < obj.length; i++) {
 
@@ -49,7 +98,8 @@ public class Terrain {
 
                 if (obj[i][j] != null) {
 
-                    terMap[i + x][j + y] = obj[i][j];
+                    terrain.terMap[i + x][j + y] = obj[i][j];
+                    terrainVis.terMap[i + x][j + y] = obj[i][j];
                 }
             }
         }

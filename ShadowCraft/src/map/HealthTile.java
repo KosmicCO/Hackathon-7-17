@@ -15,7 +15,7 @@ public class HealthTile extends Tile{
     private int health;
     private Tile nhpTile;
     
-    public HealthTile(boolean solid, int maxHealth, int health, int speed, boolean opaque, int penetrability, String spriteName, Tile nhpTile) {
+    public HealthTile(boolean solid, int maxHealth, int health, double speed, boolean opaque, double penetrability, String spriteName, Tile nhpTile) {
         
         super(solid, speed, opaque, penetrability, spriteName);
         this.maxHealth = maxHealth;
