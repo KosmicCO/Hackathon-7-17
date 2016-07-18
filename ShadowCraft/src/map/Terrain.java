@@ -15,7 +15,7 @@ public class Terrain {
 
     private final int mWidth;
     private final int mHeight;
-    private Tile[][] terMap;
+    public Tile[][] terMap;
     private int seed;
 
     public Terrain(Tile[][] map, int seed) {

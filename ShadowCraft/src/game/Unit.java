@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Set;
 import networking.Client;
 import static networking.MessageType.*;
+import org.lwjgl.input.Keyboard;
 import util.Color4;
 import static util.Color4.*;
 import util.Mutable;
@@ -22,12 +23,15 @@ public class Unit extends RegisteredEntity {
 
     public static int myTeam = 0;
     public static final Set<Unit> selected = new HashSet();
+    public static boolean aggressive = true;
 
     public static List<Color4> teamColors = Arrays.asList(
             new Color4(0, 0, 1),
             new Color4(1, 0, 0),
             new Color4(0, 1, 0),
-            new Color4(1, .5, 0)
+            new Color4(1, .75, 0),
+            new Color4(.75, 0, 1),
+            new Color4(0, 1, 1)
     );
 
     static {
@@ -49,6 +53,17 @@ public class Unit extends RegisteredEntity {
                 }
             });
         });
+        Input.whenMouse(0, false).filter(drawingBox.map(b -> !b)).onEvent(() -> {
+            selected.clear();
+            for (Unit u : RegisteredEntity.getAll(Unit.class)) {
+                if (u.unitTeam == myTeam) {
+                    if (Input.getMouse().containedBy(u.position.get().add(new Vec2(u.size)), u.position.get().subtract(new Vec2(u.size)))) {
+                        selected.add(u);
+                        break;
+                    }
+                }
+            }
+        });
 
         Input.whenMouse(1, true).onEvent(() -> {
             Mutable<Unit> target = new Mutable(null);
@@ -62,12 +77,12 @@ public class Unit extends RegisteredEntity {
             }
             if (target.o == null) {
                 selected.forEach(u -> Client.sendMessage(ORDER_MOVE, u.id, Input.getMouse()));
-//                selected.forEach(u -> u.order.set(new MoveOrder(u, Input.getMouse())));
             } else {
                 selected.forEach(u -> Client.sendMessage(ORDER_ATTACK, u.id, target.o.id));
-//                selected.forEach(u -> u.order.set(new AttackOrder(u, target.o)));
             }
         });
+
+        Input.whenKey(Keyboard.KEY_TAB, true).onEvent(() -> aggressive = !aggressive);
     }
 
     public static Unit findById(int id) {
@@ -97,7 +112,7 @@ public class Unit extends RegisteredEntity {
         rotation = Premade2D.makeRotation(this);
         Premade2D.makeSpriteGraphics(this, type.spriteName);
 
-        add(Core.renderLayer(-1).onEvent(() -> {
+        add(Core.renderLayer(-.5).onEvent(() -> {
             Graphics2D.fillEllipse(position.get(), new Vec2(size), teamColors.get(unitTeam).withA(.2), 20);
             if (selected.contains(this)) {
                 Graphics2D.drawEllipse(position.get(), new Vec2(size), WHITE, 20);
@@ -111,7 +126,9 @@ public class Unit extends RegisteredEntity {
         }));
 
         add(Core.interval(.5).filter(() -> unitTeam == myTeam).onEvent(()
-                -> Client.sendMessage(UPDATE_UNIT_POSITION, id, position.get())));
+                -> Client.sendMessage(UPDATE_UNIT_POSITION, id, position.get(), velocity.get())));
+
+        onUpdate(dt -> velocity.edit(v -> v.divide(Math.exp(dt))));
 
         onUpdate(dt -> {
             Order o = order.get();
@@ -125,11 +142,24 @@ public class Unit extends RegisteredEntity {
                 o.execute(dt);
             }
         });
+        onRender(() -> {
+            order.get().draw();
+        });
 
         onUpdate(dt -> {
             RegisteredEntity.getAll(Unit.class).forEach(other -> {
                 if (other != this && other.unitTeam == unitTeam) {
-
+                    Vec2 diff = position.get().subtract(other.position.get()).reverse();
+                    if (diff.lengthSquared() < (size + other.size) * (size + other.size)) {//(sc.size + other.size) * (sc.size + other.size)) {
+                        Vec2 diffN = diff.normalize();
+                        if (velocity.get().dot(diffN) >= 0) {
+                            Vec2 change = diff.subtract(diffN.multiply(size + other.size)).multiply(.15);
+                            position.edit(v -> v.add(change));
+                            other.position.edit(v -> v.subtract(change));
+                            other.velocity.edit(v -> v.subtract(change));
+//                            velocity.edit(v -> v.subtract(diffN.multiply(v.dot(diffN))));
+                        }
+                    }
                 }
             });
         });

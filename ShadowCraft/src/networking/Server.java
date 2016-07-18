@@ -9,6 +9,7 @@ import network.Connection;
 import network.NetworkUtils;
 import static networking.MessageType.*;
 import util.Log;
+import util.Vec2;
 
 public class Server {
 
@@ -35,7 +36,8 @@ public class Server {
     private static void registerMessageHandlers(ClientInfo client) {
         handleMessage(client, CREATE_UNIT_CLIENT, data -> {
             int id = maxUnitID++;
-            sendToAll(CREATE_UNIT, data[0], id, client.id);
+            Vec2 pos = new Vec2(100 * 32, client.id % 2 == 0 ? 64 : 198 * 32);
+            sendToAll(CREATE_UNIT, data[0], id, client.id, pos);
         });
 
         relayToAll(client, ORDER_IDLE, ORDER_MOVE, ORDER_ATTACK, UPDATE_TILE_HEALTH, UPDATE_TILE_TYPE, UPDATE_UNIT_HEALTH, UPDATE_UNIT_POSITION);
