@@ -5,6 +5,8 @@
  */
 package map;
 
+import util.Vec2;
+
 /**
  *
  * @author Kosmic
@@ -59,7 +61,7 @@ public class Terrain {
         return svr;
     }
     
-    public static boolean updateTerrain(int x, int y){
+    public static boolean updateTerrain(Vec2 pos){
         
         boolean changed = false;
         
@@ -67,21 +69,25 @@ public class Terrain {
             
             for (int j = 0; j < VISION_RANGE * 2 + 1; j++) {
                 
-                if(i - VISION_RANGE + x >= 0 && j - VISION_RANGE + y >= 0 && i - VISION_RANGE 
-                        + x < terrain.mWidth && j - VISION_RANGE + y < terrain.mHeight){
+                if(i - VISION_RANGE + pos.x >= 0 && j - VISION_RANGE + pos.y >= 0 && i - VISION_RANGE 
+                        + pos.x < terrain.mWidth && j - VISION_RANGE + pos.y < terrain.mHeight){
                     
-                    Tile t = terrain.terMap[i - VISION_RANGE + x][j - VISION_RANGE + y];
-                    Tile tv = terrainVis.terMap[i - VISION_RANGE + x][j - VISION_RANGE + y];
+                    Tile t = terrain.terMap[i - VISION_RANGE + (int) pos.x][j - VISION_RANGE + (int) pos.y];
+                    Tile tv = terrainVis.terMap[i - VISION_RANGE + (int) pos.x][j - VISION_RANGE + (int) pos.y];
                     
                     if(!t.equals(tv)){
                         
-                        terrainVis.terMap[i - VISION_RANGE + x][j - VISION_RANGE + y] = terrain.terMap[i - VISION_RANGE + x][j - VISION_RANGE + y];
+                        terrainVis.terMap[i - VISION_RANGE + (int) pos.x][j - VISION_RANGE 
+                                + (int) pos.y] = terrain.terMap[i - VISION_RANGE 
+                                + (int) pos.x][j - VISION_RANGE + (int) pos.y];
                         changed = true;
                     }
                     
                     if(!t.getSpriteName().equals(tv.getSpriteName())){
                             
-                            terrainVis.terMap[i - VISION_RANGE + x][j - VISION_RANGE + y] = terrain.terMap[i - VISION_RANGE + x][j - VISION_RANGE + y];
+                            terrainVis.terMap[i - VISION_RANGE + (int) pos.x][j - VISION_RANGE 
+                                    + (int) pos.y] = terrain.terMap[i - VISION_RANGE 
+                                    + (int) pos.x][j - VISION_RANGE + (int) pos.y];
                     }
                 }
             }
