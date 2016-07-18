@@ -5,6 +5,8 @@
  */
 package game;
 
+import map.Terrain;
+import map.generation.MapGen;
 import util.Vec2;
 
 /**
@@ -21,7 +23,30 @@ public class PathFinding {
     private Vec2 goal;
     private int width;
     private int height;
-
+    public static void main(String[] args){
+        Terrain t = (new MapGen(100).generate(40, 40));
+        double[][] speedMap = t.getSpeedMap();
+        PathFinding p = new PathFinding(speedMap,new Vec2(10,11));
+        for(int j = 0; j < 20; j++){
+            for(int i = 0; i < 20; i++){
+                if(i == 10 && j == 11){
+                    System.out.print("@");
+                }
+                else{
+                    System.out.print(speedMap[i][j] > 0 ? "." : "#");
+                }
+                
+            }
+            System.out.println();
+        }
+        for(int j = 0; j < 20; j++){
+            for(int i = 0; i < 20; i++){
+                System.out.printf("[% .1f]", p.distMap[i][j]);
+            }
+            System.out.println();
+        }
+        
+    }
     public PathFinding(double[][] speedMap, Vec2 goal) {
 
         this.speedMap = toNonDestructableMap(speedMap);
@@ -58,29 +83,31 @@ public class PathFinding {
         for (int i = 0; i < width * height - 1; i++) {
 
             Vec2 t = nl[i];
+            if(t == null) break;
             double ss = Double.POSITIVE_INFINITY;
+            if(speedMap[(int)t.x][(int)t.y] != Double.POSITIVE_INFINITY){
+                for (int j = 0; j < 8; j++) {
 
-            for (int j = 0; j < 8; j++) {
+                    Vec2 adj = t.add(new Vec2(ADX[j], ADY[j]));
 
-                Vec2 adj = t.add(new Vec2(ADX[j], ADY[j]));
+                    if (adj.x < width && adj.y < height && adj.x >= 0 && adj.y >= 0) {
 
-                if (adj.x < width && adj.y < height && adj.x >= 0 && adj.y >= 0) {
+                        double speed = dm[(int) adj.x][(int) adj.y];
 
-                    double speed = dm[(int) adj.x][(int) adj.y];
+                        if (ss > speed && speed > 0) {
 
-                    if (ss > speed && speed > 0) {
+                            ss = speed;
+                        } else if (speed == 0) {
 
-                        ss = speed;
-                    } else if (speed == 0) {
-
-                        dm[(int) adj.x][(int) adj.y] = -2;
-                        nl[index] = adj;
-                        index++;
+                            dm[(int) adj.x][(int) adj.y] = -2;
+                            nl[index] = adj;
+                            index++;
+                        }
                     }
                 }
             }
-
             dm[(int) t.x][(int) t.y] = ss + speedMap[(int) t.x][(int) t.y];
+            
         }
 
         return dm;
