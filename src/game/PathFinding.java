@@ -15,8 +15,8 @@ import util.Vec2;
  */
 public class PathFinding {
 
-    private static final int[] ADX = {-1, 0, 1, -1, 1, -1, 0, 1};
-    private static final int[] ADY = {-1, -1, -1, 0, 0, 1, 1, 1};
+    private static final int[] ADX = {-1, 0, 1, 1, 1, 0, -1, -1};
+    private static final int[] ADY = {-1, -1, -1, 0, 1, 1, 1, 0};
 
     private double[][] speedMap;
     private double[][] distMap;
@@ -25,7 +25,7 @@ public class PathFinding {
     private int height;
 
     public static void main(String[] args) {
-        Terrain t = (new MapGen(100).generate(40, 40));
+        Terrain t = (new MapGen(7392).generate(40, 40));
         double[][] speedMap = t.getSpeedMap();
         PathFinding p = new PathFinding(speedMap, new Vec2(10, 11));
         for (int j = 0; j < 20; j++) {
@@ -84,9 +84,9 @@ public class PathFinding {
         double[][] dm = new double[width][height];
         dm[(int) goal.x][(int) goal.y] = 1;
 
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < 8; i++) {
 
-            if (i != 0 && i != 2 && i != 5) {
+            if (i % 2 == 1) {
 
                 Vec2 adj = goal.add(new Vec2(ADX[i], ADY[i]));
 
@@ -114,6 +114,15 @@ public class PathFinding {
                     if (adj.x < width && adj.y < height && adj.x >= 0 && adj.y >= 0) {
 
                         double speed = dm[(int) adj.x][(int) adj.y];
+                        
+                        if(j % 2 == 0){
+                            
+                            if(speedMap[(int) adj.x - ADX[j]][(int) adj.y] == Double.POSITIVE_INFINITY
+                                    || speedMap[(int) adj.x][(int) adj.y - ADY[j]] == Double.POSITIVE_INFINITY){
+                                
+                                speed = Double.POSITIVE_INFINITY;
+                            }
+                        }
 
                         if (ss > speed && speed > 0) {
 
