@@ -10,8 +10,11 @@ public enum MessageType {
     CREATE_UNIT_CLIENT(UnitType.class), //Unit type
     CREATE_UNIT(UnitType.class, Integer.class, Integer.class), //Unit type, unit id, unit team
 
+    ORDER_IDLE(Integer.class), //Unit id
     ORDER_MOVE(Integer.class, Vec2.class), //Unit id, position
     ORDER_ATTACK(Integer.class, Integer.class), //Unit id, target id
+
+    SET_CLIENT_TEAM(Integer.class), //team
 
     UPDATE_TILE_HEALTH(Integer.class, Integer.class, Double.class), //x, y, health
     UPDATE_TILE_TYPE(Integer.class, Integer.class, Integer.class), //x, y, tile type

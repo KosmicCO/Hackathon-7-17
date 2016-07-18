@@ -4,14 +4,14 @@ import engine.Core;
 import engine.Input;
 import engine.Signal;
 import examples.Premade2D;
-import game.Order.AttackOrder;
 import game.Order.IdleOrder;
-import game.Order.MoveOrder;
 import graphics.Graphics2D;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import networking.Client;
+import static networking.MessageType.*;
 import util.Color4;
 import static util.Color4.*;
 import util.Mutable;
@@ -54,29 +54,31 @@ public class Unit extends RegisteredEntity {
             Mutable<Unit> target = new Mutable(null);
             for (Unit u : RegisteredEntity.getAll(Unit.class)) {
                 if (u.unitTeam != myTeam) {
-                    if (Input.getMouse().containedBy(u.position.get().add(u.size), u.position.get().subtract(u.size))) {
+                    if (Input.getMouse().containedBy(u.position.get().add(new Vec2(u.size)), u.position.get().subtract(new Vec2(u.size)))) {
                         target.o = u;
                         break;
                     }
                 }
             }
             if (target.o == null) {
-                selected.forEach(u -> u.order.set(new MoveOrder(u, Input.getMouse())));
+                selected.forEach(u -> Client.sendMessage(ORDER_MOVE, u.id, Input.getMouse()));
+//                selected.forEach(u -> u.order.set(new MoveOrder(u, Input.getMouse())));
             } else {
-                selected.forEach(u -> u.order.set(new AttackOrder(u, target.o)));
+                selected.forEach(u -> Client.sendMessage(ORDER_ATTACK, u.id, target.o.id));
+//                selected.forEach(u -> u.order.set(new AttackOrder(u, target.o)));
             }
         });
     }
 
     public static Unit findById(int id) {
-        return RegisteredEntity.getAll(Unit.class).stream().filter(u -> u.id == id).findAny().get();
+        return RegisteredEntity.getAll(Unit.class).stream().filter(u -> u.id == id).findAny().orElse(null);
     }
 
-    public int id;
+    public int id = -1;
     public Signal<Vec2> position, velocity;
     public Signal<Double> rotation;
     public Signal<Order> order = new Signal(new IdleOrder(this));
-    public Vec2 size = new Vec2(20);
+    public double size = 20;
     public final UnitType type;
     public int unitTeam;
     public Signal<Integer> health = new Signal(null);
@@ -96,26 +98,40 @@ public class Unit extends RegisteredEntity {
         Premade2D.makeSpriteGraphics(this, type.spriteName);
 
         add(Core.renderLayer(-1).onEvent(() -> {
-            Graphics2D.fillEllipse(position.get(), size, teamColors.get(unitTeam).withA(.2), 20);
+            Graphics2D.fillEllipse(position.get(), new Vec2(size), teamColors.get(unitTeam).withA(.2), 20);
             if (selected.contains(this)) {
-                Graphics2D.drawEllipse(position.get(), size, WHITE, 20);
+                Graphics2D.drawEllipse(position.get(), new Vec2(size), WHITE, 20);
             }
         }));
         add(Core.renderLayer(1).onEvent(() -> {
             if (health.get() < type.maxHealth) {
-                Graphics2D.fillRect(position.get().subtract(size), new Vec2(size.x * 2, size.x / 5), BLACK);
-                Graphics2D.fillRect(position.get().subtract(size), new Vec2(size.x * 2 * health.get() / type.maxHealth, size.x / 5), GREEN);
+                Graphics2D.fillRect(position.get().subtract(new Vec2(size)), new Vec2(size * 2, size / 5), BLACK);
+                Graphics2D.fillRect(position.get().subtract(new Vec2(size)), new Vec2(size * 2 * Math.max(health.get(), 0) / type.maxHealth, size / 5), GREEN);
             }
         }));
+
+        add(Core.interval(.5).filter(() -> unitTeam == myTeam).onEvent(()
+                -> Client.sendMessage(UPDATE_UNIT_POSITION, id, position.get())));
 
         onUpdate(dt -> {
             Order o = order.get();
             if (o.isFinished()) {
-                order.set(new IdleOrder(this));
+                if (unitTeam == myTeam) {
+                    Client.sendMessage(ORDER_IDLE, id);
+                    order.set(new IdleOrder(this));
+                }
                 o.onFinish();
             } else {
                 o.execute(dt);
             }
+        });
+
+        onUpdate(dt -> {
+            RegisteredEntity.getAll(Unit.class).forEach(other -> {
+                if (other != this && other.unitTeam == unitTeam) {
+
+                }
+            });
         });
     }
 }
