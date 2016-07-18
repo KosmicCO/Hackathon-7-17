@@ -82,6 +82,15 @@ public class Unit extends RegisteredEntity {
             }
         });
 
+        Input.whenKey(Keyboard.KEY_F2, true).onEvent(() -> {
+            selected.clear();
+            RegisteredEntity.getAll(Unit.class).forEach(u -> {
+                if (u.unitTeam == myTeam) {
+                    selected.add(u);
+                }
+            });
+        });
+
         Input.whenKey(Keyboard.KEY_TAB, true).onEvent(() -> aggressive = !aggressive);
     }
 
