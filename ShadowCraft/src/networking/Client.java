@@ -1,72 +1,68 @@
 package networking;
 
 import engine.Core;
+import engine.Input;
+import game.Order.AttackOrder;
+import game.Order.MoveOrder;
+import game.Unit;
+import game.UnitType;
+import static game.UnitType.BASIC_RANGED;
+import graphics.Window2D;
 import java.util.Arrays;
 import java.util.function.Consumer;
 import network.Connection;
 import network.NetworkUtils;
-import org.lwjgl.opengl.Display;
+import static networking.MessageType.*;
+import org.lwjgl.input.Keyboard;
+import static util.Color4.gray;
 import util.ThreadManager;
+import util.Vec2;
 
 public abstract class Client {
 
     public static boolean IS_MULTIPLAYER = true;
     private static Connection conn;
-//    public static Chat con;
 
     public static void main(String[] args) {
-        //Set the game to 3D - this must go before Core.init();
-        Core.is3D = true;
+        connect("localhost");
+
         Core.init();
 
-        //Show the fps
-        Core.render.bufferCount(Core.interval(1)).forEach(i -> Display.setTitle("FPS: " + i));
+        Window2D.background = gray(.5);
 
-//        MiniChat mc = new MiniChat("mChat++");
-//        Play ps = new Play("level select", new Vec2(Core.screenWidth, Core.screenHeight));
-//        Join jn = new Join("ip select");
-//        Options op = new Options("options Menu");
-//        ChangeInt ci = new ChangeInt("chai");
-//
-//        TitleScreen ts = new TitleScreen("main menu", new Vec2(Core.screenWidth, Core.screenHeight));
-//
-//        TypingManager tpm = new TypingManager(ts);
-//        GUIController.add(ts, jn, ps, mc, op, ci);
-//
-//        //Sounds.playSound("ethereal.mp3", true, .05);
-//        Core.update.onEvent(GUIController::update);
-//        Core.renderLayer(100).onEvent(GUIController::draw);
-//
-//        Core.renderLayer(99).onEvent(() -> {
-//            if (CubeMap.MAP_NAME == null) {
-//                Window3D.guiProjection();
-//                Graphics2D.drawSprite(SpriteContainer.loadSprite("titlepage"), new Vec2(600, 400), new Vec2(.5), 0, Color4.WHITE);
-//                Window3D.resetProjection();
-//            }
-//        });
-//
-//        //Start the game
-//        ts.start();
+        Unit u = new Unit(BASIC_RANGED, 0);
+        u.create();
+
+        for (int x = 5; x < 15; x++) {
+            for (int y = 5; y < 15; y++) {
+                Unit u2 = new Unit(BASIC_RANGED, 1);
+                u2.create();
+                u2.position.set(new Vec2(x, y).multiply(50));
+            }
+        }
+
+        Input.mouseWheel.forEach(i -> Window2D.viewSize = Window2D.viewSize.multiply(Math.exp(i / -1000.)));
+        double windowSpeed = 500;
+        Input.whileKeyDown(Keyboard.KEY_W).forEach(dt -> {
+            Window2D.viewPos = Window2D.viewPos.add(new Vec2(0, windowSpeed * dt));
+        });
+        Input.whileKeyDown(Keyboard.KEY_A).forEach(dt -> {
+            Window2D.viewPos = Window2D.viewPos.add(new Vec2(-windowSpeed * dt, 0));
+        });
+        Input.whileKeyDown(Keyboard.KEY_S).forEach(dt -> {
+            Window2D.viewPos = Window2D.viewPos.add(new Vec2(0, -windowSpeed * dt));
+        });
+        Input.whileKeyDown(Keyboard.KEY_D).forEach(dt -> {
+            Window2D.viewPos = Window2D.viewPos.add(new Vec2(windowSpeed * dt, 0));
+        });
+
         Core.run();
-
-        //Force the program to stop
-        System.exit(0);
     }
 
     public static void connect(String ip) {
-
         if (IS_MULTIPLAYER) {
-            //Try to connect to the server
-            //if (args.length == 0) {
             conn = NetworkUtils.connect(ip);
-            //} else {
-            //    conn = NetworkUtils.connect(args[0]);
-            //}
-
-            //Handle messages recieved from the connection
             registerMessageHandlers();
-
-//            sendMessage(GET_NAME, "NewPlayer");
             Core.timer(.5, conn::open);
         }
     }
@@ -82,56 +78,26 @@ public abstract class Client {
     }
 
     public static void registerMessageHandlers() {
+        handleMessage(CREATE_UNIT, data -> {
+            Unit u = new Unit((UnitType) data[0], (Integer) data[2]);
+            u.id = (Integer) data[1];
+        });
 
-//        handleMessage(GET_NAME, data -> {
-//
-//            Game.setName((String) data[0]);
-//        });
-//
-//        handleMessage(SCORE, data -> {
-//
-//            ((Score) GUIController.getGUI("scorb")).point((String) data[0]);
-//        });
-//
-//        handleMessage(SNOWBALL, data -> {
-//            BallAttack b = new BallAttack();
-//            b.create();
-//            b.get("position", Vec3.class).set((Vec3) data[0]);
-//            b.get("velocity", Vec3.class).set((Vec3) data[1]);
-//            b.isEnemy = true;
-//            b.thrower = (int) data[2];
-//        });
-//
-//        handleMessage(HIT, data -> {
-//            Particle.explode((Vec3) data[0], new Color4(0, .5, 1));
-//            Sounds.playSound("hit.wav");
-//        });
-//
-//        handleMessage(CHAT_MESSAGE, data -> {
-//            con.addChat((String) data[0]);
-//        });
-//
-//        handleMessage(BLOCK_PLACE, data -> {
-//            Vec3 coords = (Vec3) data[0];
-//            CubeMap.setCube((int) coords.x, (int) coords.y, (int) coords.z, CubeType.idToType((int) data[1]));
-//        });
-//
-//        handleMessage(MAP_FILE, data -> {
-//            CubeMap.load("levels/level_" + data[0] + ".txt");
-//        });
-//
-//        handleMessage(RESTART, data -> {
-//            RegisteredEntity.getAll(BallAttack.class, Player.class).forEach(Destructible::destroy);
-//            Particle.clear();
-//            new Player().create();
-//        });
-//
-//        handleMessage(MODEL_PLACE, data -> {
-//            if (data[1] == null) {
-//                ModelList.remove((Vec3) data[0]);
-//            }
-//            ModelList.add((Vec3) data[0], (String) data[1]);
-//        });
+        handleMessage(ORDER_MOVE, data -> {
+            Unit u = Unit.findById((Integer) data[0]);
+            u.order.set(new MoveOrder(u, (Vec2) data[1]));
+        });
+        handleMessage(ORDER_ATTACK, data -> {
+            Unit u = Unit.findById((Integer) data[0]);
+            u.order.set(new AttackOrder(u, Unit.findById((Integer) data[1])));
+        });
+
+        handleMessage(UPDATE_UNIT_HEALTH, data -> {
+            Unit.findById((Integer) data[0]).health.set((Integer) data[1]);
+        });
+        handleMessage(UPDATE_UNIT_POSITION, data -> {
+            Unit.findById((Integer) data[0]).position.set((Vec2) data[1]);
+        });
     }
 
     public static void sendMessage(MessageType type, Object... contents) {

@@ -68,6 +68,11 @@ public class Unit extends RegisteredEntity {
         });
     }
 
+    public static Unit findById(int id) {
+        return RegisteredEntity.getAll(Unit.class).stream().filter(u -> u.id == id).findAny().get();
+    }
+
+    public int id;
     public Signal<Vec2> position, velocity;
     public Signal<Double> rotation;
     public Signal<Order> order = new Signal(new IdleOrder(this));

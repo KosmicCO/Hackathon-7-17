@@ -2,31 +2,27 @@ package networking;
 
 import game.UnitType;
 import java.util.Arrays;
+import network.NetworkUtils;
 import util.Vec2;
 
 public enum MessageType {
 
-    CREATE_UNIT(UnitType.class, Integer.class),
-    DAMAGE_UNIT(Integer.class),
-    ORDER_MOVE(Integer.class, Vec2.class),
-    ORDER_ATTACK(Integer.class, Integer.class),
-    UPDATE_UNIT_POSITION(Integer.class, Vec2.class);
+    CREATE_UNIT_CLIENT(UnitType.class), //Unit type
+    CREATE_UNIT(UnitType.class, Integer.class, Integer.class), //Unit type, unit id, unit team
 
-//    SCORE(String.class), //who got a point
-//    GET_NAME(String.class), //retrieve client name
-//
-//    SNOWBALL(Vec3.class, Vec3.class, Integer.class), //position, velocity, id
-//
-//    HIT(Vec3.class, Integer.class), //position, id
-//
-//    CHAT_MESSAGE(String.class), //the contents of the message
-//
-//    BLOCK_PLACE(Vec3.class, Integer.class), //position, cube type id
-//
-//    MAP_FILE(String.class), //map name
-//
-//    MODEL_PLACE(Vec3.class, Integer.class),
-//    RESTART(); //no information needed
+    ORDER_MOVE(Integer.class, Vec2.class), //Unit id, position
+    ORDER_ATTACK(Integer.class, Integer.class), //Unit id, target id
+
+    UPDATE_TILE_HEALTH(Integer.class, Integer.class, Double.class), //x, y, health
+    UPDATE_TILE_TYPE(Integer.class, Integer.class, Integer.class), //x, y, tile type
+
+    UPDATE_UNIT_HEALTH(Integer.class, Integer.class), //Unit id, health
+    UPDATE_UNIT_POSITION(Integer.class, Vec2.class); //Unit id, position
+
+    static {
+        NetworkUtils.registerType(UnitType.class, c -> UnitType.valueOf(c.read(String.class)), (c, u) -> c.write(u.name()));
+    }
+
     public final Class[] dataTypes;
 
     private MessageType(Class... dataTypes) {
