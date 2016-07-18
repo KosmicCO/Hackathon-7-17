@@ -9,7 +9,6 @@ import network.Connection;
 import network.NetworkUtils;
 import static networking.MessageType.*;
 import util.Log;
-import util.ThreadManager;
 
 public class Server {
 
@@ -39,11 +38,11 @@ public class Server {
             sendToAll(CREATE_UNIT, data[0], id, client.id);
         });
 
-        relayToAll(client, ORDER_MOVE, ORDER_ATTACK, UPDATE_TILE_HEALTH, UPDATE_TILE_TYPE, UPDATE_UNIT_HEALTH, UPDATE_UNIT_POSITION);
+        relayToAll(client, ORDER_IDLE, ORDER_MOVE, ORDER_ATTACK, UPDATE_TILE_HEALTH, UPDATE_TILE_TYPE, UPDATE_UNIT_HEALTH, UPDATE_UNIT_POSITION);
     }
 
     private static void sendInitialData(ClientInfo client) {
-
+        sendTo(client, SET_CLIENT_TEAM, client.id);
     }
 
     private static final List<ClientInfo> CLIENTS = new LinkedList();
@@ -72,13 +71,17 @@ public class Server {
             for (int i = 0; i < type.dataTypes.length; i++) {
                 data[i] = info.conn.read(type.dataTypes[i]);
             }
-            ThreadManager.onMainThread(() -> handler.accept(data));
+            handler.accept(data);
+            //ThreadManager.onMainThread(() -> handler.accept(data));
         });
     }
 
     private static void relayToAll(ClientInfo info, MessageType... types) {
         for (MessageType type : types) {
-            handleMessage(info, type, data -> sendToAll(type, data));
+            handleMessage(info, type, data -> {
+                System.out.println("Received message " + type + " from client " + info.id);
+                sendToAll(type, data);
+            });
         }
     }
 
