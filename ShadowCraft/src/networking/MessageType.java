@@ -8,7 +8,7 @@ import util.Vec2;
 public enum MessageType {
 
     CREATE_UNIT_CLIENT(UnitType.class), //Unit type
-    CREATE_UNIT(UnitType.class, Integer.class, Integer.class), //Unit type, unit id, unit team
+    CREATE_UNIT(UnitType.class, Integer.class, Integer.class, Vec2.class), //Unit type, unit id, unit team, position
 
     ORDER_IDLE(Integer.class), //Unit id
     ORDER_MOVE(Integer.class, Vec2.class), //Unit id, position
@@ -20,7 +20,7 @@ public enum MessageType {
     UPDATE_TILE_TYPE(Integer.class, Integer.class, Integer.class), //x, y, tile type
 
     UPDATE_UNIT_HEALTH(Integer.class, Integer.class), //Unit id, health
-    UPDATE_UNIT_POSITION(Integer.class, Vec2.class); //Unit id, position
+    UPDATE_UNIT_POSITION(Integer.class, Vec2.class, Vec2.class); //Unit id, position, velocity
 
     static {
         NetworkUtils.registerType(UnitType.class, c -> UnitType.valueOf(c.read(String.class)), (c, u) -> c.write(u.name()));
