@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import static map.Terrain.terrainVis;
+import map.Tile;
 import networking.Client;
 import static networking.MessageType.UPDATE_UNIT_HEALTH;
 import static util.Color4.WHITE;
@@ -80,7 +81,7 @@ public abstract class Order {
 
             if (!GOALS.containsKey(goal)) {
 
-                GOALS.put(goal, (new Pathfinder(terrainVis.getSpeedMap(), goal)).getDistMap());
+                GOALS.put(goal, (new Pathfinder(terrainVis.getSpeedMap(), goal.divide(Tile.RESOLUTION))).getDistMap());
             }
         }
 
@@ -94,7 +95,7 @@ public abstract class Order {
                 if (!executed) {
                     
                     double[][] dm = GOALS.get(goal);
-                    Vec2 p = u.position.get();
+                    Vec2 p = u.position.get().divide(Tile.RESOLUTION);
                     int width = dm.length;
                     int height = dm[0].length;
                     double ss = dm[(int) p.x][(int) p.y];
@@ -111,7 +112,7 @@ public abstract class Order {
                             if (ss > speed && speed > 0) {
 
                                 ss = speed;
-                                dir = adj;
+                                dir = adj.multiply(-1);
                             }
                         }
                     }
