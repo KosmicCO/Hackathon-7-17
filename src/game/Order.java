@@ -1,9 +1,15 @@
 package game;
 
+import engine.Core;
+import static game.Pathfinder.ADX;
+import static game.Pathfinder.ADY;
 import static game.Unit.myTeam;
 import graphics.Graphics2D;
 import static java.util.Comparator.comparingDouble;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+import static map.Terrain.terrainVis;
 import networking.Client;
 import static networking.MessageType.UPDATE_UNIT_HEALTH;
 import static util.Color4.WHITE;
@@ -62,17 +68,66 @@ public abstract class Order {
 
     public static class MoveOrder extends Order {
 
+        public static final Map<Vec2, double[][]> GOALS = new HashMap();
+
         public Vec2 goal;
+        public boolean executed;
 
         public MoveOrder(Unit u, Vec2 goal) {
             super(u);
             this.goal = goal;
+            executed = false;
+
+            if (!GOALS.containsKey(goal)) {
+
+                GOALS.put(goal, (new Pathfinder(terrainVis.getSpeedMap(), goal)).getDistMap());
+            }
         }
 
         @Override
         public void execute(double dt) {
-            u.velocity.set(goal.subtract(u.position.get()).withLength(u.type.moveSpeed));
-            aggressive();
+            
+            //u.velocity.set(goal.subtract(u.position.get()).withLength(u.type.moveSpeed));
+
+            Core.update.onEvent(() -> {
+
+                if (!executed) {
+                    
+                    double[][] dm = GOALS.get(goal);
+                    Vec2 p = u.position.get();
+                    int width = dm.length;
+                    int height = dm[0].length;
+                    double ss = dm[(int) p.x][(int) p.y];
+                    Vec2 dir = null;
+
+                    for (int i = 0; i < 8; i++) {
+
+                        Vec2 adj = p.add(new Vec2(ADX[i], ADY[i]));
+
+                        if (adj.x < width && adj.y < height && adj.x >= 0 && adj.y >= 0) {
+
+                            double speed = dm[(int) adj.x][(int) adj.y];
+
+                            if (ss > speed && speed > 0) {
+
+                                ss = speed;
+                                dir = adj;
+                            }
+                        }
+                    }
+
+                    if (ss == dm[(int) p.x][(int) p.y]) {
+
+                        executed = true;
+                    }else{
+                        
+                        u.velocity.set(dir.withLength(u.type.moveSpeed));
+                    }
+
+                    aggressive();
+                }
+            });
+
         }
 
         @Override

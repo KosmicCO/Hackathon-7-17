@@ -13,10 +13,10 @@ import util.Vec2;
  *
  * @author Kosmic
  */
-public class PathFinding {
+public class Pathfinder {
 
-    private static final int[] ADX = {-1, 0, 1, 1, 1, 0, -1, -1};
-    private static final int[] ADY = {-1, -1, -1, 0, 1, 1, 1, 0};
+    public static final int[] ADX = {-1, 0, 1, 1, 1, 0, -1, -1};
+    public static final int[] ADY = {-1, -1, -1, 0, 1, 1, 1, 0};
 
     private double[][] speedMap;
     private double[][] distMap;
@@ -27,7 +27,7 @@ public class PathFinding {
     public static void main(String[] args) {
         Terrain t = (new MapGen(7392).generate(40, 40));
         double[][] speedMap = t.getSpeedMap();
-        PathFinding p = new PathFinding(speedMap, new Vec2(10, 11));
+        Pathfinder p = new Pathfinder(speedMap, new Vec2(10, 11));
         for (int j = 0; j < 20; j++) {
             for (int i = 0; i < 20; i++) {
                 if (i == 10 && j == 11) {
@@ -42,9 +42,9 @@ public class PathFinding {
         for (int j = 0; j < 20; j++) {
             for (int i = 0; i < 20; i++) {
                 if(p.distMap[i][j] != Double.POSITIVE_INFINITY)
-                System.out.printf("[% 3.0f]", p.distMap[i][j]);
+                System.out.printf("[% 3.2f]", p.distMap[i][j]);
                 else{
-                    System.out.print("[inf]");
+                    System.out.print("[ inf ]");
                 }
             }
             System.out.println();
@@ -52,7 +52,7 @@ public class PathFinding {
 
     }
 
-    public PathFinding(double[][] speedMap, Vec2 goal) {
+    public Pathfinder(double[][] speedMap, Vec2 goal) {
 
         this.speedMap = toNonDestructableMap(speedMap);
         this.width = speedMap.length;
@@ -113,9 +113,11 @@ public class PathFinding {
 
                     if (adj.x < width && adj.y < height && adj.x >= 0 && adj.y >= 0) {
 
-                        double speed = dm[(int) adj.x][(int) adj.y];
+                        double speed = dm[(int) adj.x][(int) adj.y] ;
                         
                         if(j % 2 == 0){
+                            
+                            speed *= Math.sqrt(2.0);
                             
                             if(speedMap[(int) adj.x - ADX[j]][(int) adj.y] == Double.POSITIVE_INFINITY
                                     || speedMap[(int) adj.x][(int) adj.y - ADY[j]] == Double.POSITIVE_INFINITY){
@@ -141,5 +143,10 @@ public class PathFinding {
         }
 
         return dm;
+    }
+
+    public double[][] getDistMap() {
+        
+        return distMap;
     }
 }
