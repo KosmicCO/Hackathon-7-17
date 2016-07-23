@@ -120,7 +120,7 @@ public abstract class Order {
                         executed = true;
                     }else{
                         
-                        u.velocity.set(dir.withLength(u.type.moveSpeed));
+                        
                     }
 
                     aggressive();
