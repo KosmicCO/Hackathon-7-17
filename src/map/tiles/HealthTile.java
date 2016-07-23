@@ -5,13 +5,11 @@
  */
 package map.tiles;
 
-import game.interfaces.Health;
-
 /**
  *
  * @author Kosmic
  */
-public class HealthTile extends Tile implements Health{
+public class HealthTile extends Tile{
     
     protected int maxHealth;
     protected int health;
@@ -24,31 +22,26 @@ public class HealthTile extends Tile implements Health{
         this.nhpTile = nhpTile;
     }
 
-    @Override
     public void setHealth(int health) {
 
         this.health = health;
     }
 
-    @Override
     public void setMaxHealth(int hp) {
 
         maxHealth = hp;
     }
     
-    @Override
     public int getMaxHealth() {
 
         return maxHealth;
     }
 
-    @Override
     public int getHealth() {
 
         return health;
     }
     
-    @Override
     public int takeDamage(int hp) {
 
         health += hp;
