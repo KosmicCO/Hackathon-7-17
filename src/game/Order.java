@@ -1,6 +1,5 @@
 package game;
 
-import engine.Core;
 import static game.Pathfinder.ADX;
 import static game.Pathfinder.ADY;
 import static game.Unit.myTeam;
@@ -87,46 +86,35 @@ public abstract class Order {
 
         @Override
         public void execute(double dt) {
-            
-            //u.velocity.set(goal.subtract(u.position.get()).withLength(u.type.moveSpeed));
+            double[][] dm = GOALS.get(goal);
+            Vec2 p = u.position.get().divide(Tile.RESOLUTION);
+            int width = dm.length;
+            int height = dm[0].length;
+            double ss = dm[(int) p.x][(int) p.y];
+            Vec2 best = null;
 
-            Core.update.onEvent(() -> {
+            for (int i = 0; i < 8; i++) {
 
-                if (!executed) {
-                    
-                    double[][] dm = GOALS.get(goal);
-                    Vec2 p = u.position.get().divide(Tile.RESOLUTION);
-                    int width = dm.length;
-                    int height = dm[0].length;
-                    double ss = dm[(int) p.x][(int) p.y];
+                Vec2 adj = p.add(new Vec2(ADX[i], ADY[i]));
 
-                    for (int i = 0; i < 8; i++) {
+                if (adj.x < width && adj.y < height && adj.x >= 0 && adj.y >= 0) {
 
-                        Vec2 adj = p.add(new Vec2(ADX[i], ADY[i]));
+                    double speed = dm[(int) adj.x][(int) adj.y];
 
-                        if (adj.x < width && adj.y < height && adj.x >= 0 && adj.y >= 0) {
+                    if (ss > speed && speed > 0) {
 
-                            double speed = dm[(int) adj.x][(int) adj.y];
-
-                            if (ss > speed && speed > 0) {
-
-                                ss = speed;
-                            }
-                        }
+                        ss = speed;
+                        best = adj;
                     }
-
-                    if (ss == dm[(int) p.x][(int) p.y]) {
-
-                        executed = true;
-                    }else{
-                        
-                        
-                    }
-
-                    aggressive();
                 }
-            });
+            }
 
+            if (best != null) {
+                best = best.multiply(Tile.RESOLUTION);
+                u.velocity.set(best.subtract(u.position.get()).withLength(u.type.moveSpeed));
+            }
+
+            aggressive();
         }
 
         @Override

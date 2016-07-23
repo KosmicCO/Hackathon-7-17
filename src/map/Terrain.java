@@ -60,39 +60,52 @@ public class Terrain {
 
         return svr;
     }
-    
-    public static boolean updateTerrain(Vec2 pos){
-        
-        boolean changed = false;
-        
-        for (int i = 0; i < VISION_RANGE * 2 + 1; i++) {
-            
-            for (int j = 0; j < VISION_RANGE * 2 + 1; j++) {
-                
-                if(i - VISION_RANGE + pos.x >= 0 && j - VISION_RANGE + pos.y >= 0 && i - VISION_RANGE 
-                        + pos.x < terrain.mWidth && j - VISION_RANGE + pos.y < terrain.mHeight){
-                    
-                    Tile t = terrain.terMap[i - VISION_RANGE + (int) pos.x][j - VISION_RANGE + (int) pos.y];
-                    Tile tv = terrainVis.terMap[i - VISION_RANGE + (int) pos.x][j - VISION_RANGE + (int) pos.y];
-                    
-                    if(!t.equals(tv)){
-                        
-                        terrainVis.terMap[i - VISION_RANGE + (int) pos.x][j - VISION_RANGE 
-                                + (int) pos.y] = terrain.terMap[i - VISION_RANGE 
-                                + (int) pos.x][j - VISION_RANGE + (int) pos.y];
-                        changed = true;
-                    }
-                    
-                    if(!t.getSpriteName().equals(tv.getSpriteName())){
-                            
-                            terrainVis.terMap[i - VISION_RANGE + (int) pos.x][j - VISION_RANGE 
-                                    + (int) pos.y] = terrain.terMap[i - VISION_RANGE 
-                                    + (int) pos.x][j - VISION_RANGE + (int) pos.y];
+
+    public static boolean isSolid(Vec2 pos, Vec2 size) {
+        for (int i = (int) (pos.x - size.x); i <= pos.x + size.x; i++) {
+            for (int j = (int) (pos.y - size.y); j <= pos.y + size.y; j++) {
+                if (i < terrain.getWidth() && i >= 0 && j < terrain.getHeight() && j >= 0) {
+                    if (terrain.terMap[i][j].getSpeed() == 0) {
+                        return true;
                     }
                 }
             }
         }
-        
+        return false;
+    }
+
+    public static boolean updateTerrain(Vec2 pos) {
+
+        boolean changed = false;
+
+        for (int i = 0; i < VISION_RANGE * 2 + 1; i++) {
+
+            for (int j = 0; j < VISION_RANGE * 2 + 1; j++) {
+
+                if (i - VISION_RANGE + pos.x >= 0 && j - VISION_RANGE + pos.y >= 0 && i - VISION_RANGE
+                        + pos.x < terrain.mWidth && j - VISION_RANGE + pos.y < terrain.mHeight) {
+
+                    Tile t = terrain.terMap[i - VISION_RANGE + (int) pos.x][j - VISION_RANGE + (int) pos.y];
+                    Tile tv = terrainVis.terMap[i - VISION_RANGE + (int) pos.x][j - VISION_RANGE + (int) pos.y];
+
+                    if (!t.equals(tv)) {
+
+                        terrainVis.terMap[i - VISION_RANGE + (int) pos.x][j - VISION_RANGE
+                                + (int) pos.y] = terrain.terMap[i - VISION_RANGE
+                                + (int) pos.x][j - VISION_RANGE + (int) pos.y];
+                        changed = true;
+                    }
+
+                    if (!t.getSpriteName().equals(tv.getSpriteName())) {
+
+                        terrainVis.terMap[i - VISION_RANGE + (int) pos.x][j - VISION_RANGE
+                                + (int) pos.y] = terrain.terMap[i - VISION_RANGE
+                                + (int) pos.x][j - VISION_RANGE + (int) pos.y];
+                    }
+                }
+            }
+        }
+
         return changed;
     }
 

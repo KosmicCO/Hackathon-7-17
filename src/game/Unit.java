@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import map.Terrain;
 import networking.Client;
 import static networking.MessageType.*;
 import org.lwjgl.input.Keyboard;
@@ -119,8 +120,34 @@ public class Unit extends RegisteredEntity {
         position = Premade2D.makePosition(this);
         velocity = Premade2D.makeVelocity(this);
         rotation = Premade2D.makeRotation(this);
-        Premade2D.makeSpriteGraphics(this, type.spriteName);
 
+        Signal<Vec2> prevPos = new Signal(null);
+        onUpdate(dt -> {
+            prevPos.set(position.get());
+            if (Terrain.isSolid(position.get(), new Vec2(size))) {
+                int detail = 20;
+                Vec2 delta = position.get().subtract(prevPos.get()).divide(detail);
+                position.set(prevPos.get());
+                for (int i = 0; i < detail; i++) {
+                    position.edit(delta.withY(0)::add);
+                    if (Terrain.isSolid(position.get(), new Vec2(size))) {
+                        position.edit(delta.withY(0).reverse()::add);
+                        velocity.edit(v -> v.withX(0));
+                        break;
+                    }
+                }
+                for (int i = 0; i < detail; i++) {
+                    position.edit(delta.withX(0)::add);
+                    if (Terrain.isSolid(position.get(), new Vec2(size))) {
+                        position.edit(delta.withX(0).reverse()::add);
+                        velocity.edit(v -> v.withY(0));
+                        break;
+                    }
+                }
+            }
+        });
+
+        Premade2D.makeSpriteGraphics(this, type.spriteName);
         add(Core.renderLayer(-.5).onEvent(() -> {
             Graphics2D.fillEllipse(position.get(), new Vec2(size), teamColors.get(unitTeam).withA(.2), 20);
             if (selected.contains(this)) {

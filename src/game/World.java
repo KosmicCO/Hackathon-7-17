@@ -49,6 +49,7 @@ public class World {
         });
 
         Terrain terrain = new MapGen(0).generate(200, 200);
+        Terrain.terrain = terrain;
         Terrain.terrainVis = terrain;
         Core.renderLayer(-1).onEvent(() -> {
             glEnable(GL_TEXTURE_2D);
