@@ -103,7 +103,7 @@ public class Unit extends RegisteredEntity {
     public Signal<Vec2> position, velocity;
     public Signal<Double> rotation;
     public Signal<Order> order = new Signal(new IdleOrder(this));
-    public double size = 20;
+    public double size = 10;
     public final UnitType type;
     public int unitTeam;
     public Signal<Integer> health = new Signal(null);
@@ -118,12 +118,11 @@ public class Unit extends RegisteredEntity {
     @Override
     protected void createInner() {
         position = Premade2D.makePosition(this);
+        Signal<Vec2> prevPos = new Signal(null);
         velocity = Premade2D.makeVelocity(this);
         rotation = Premade2D.makeRotation(this);
 
-        Signal<Vec2> prevPos = new Signal(null);
         onUpdate(dt -> {
-            prevPos.set(position.get());
             if (Terrain.isSolid(position.get(), new Vec2(size))) {
                 int detail = 20;
                 Vec2 delta = position.get().subtract(prevPos.get()).divide(detail);
@@ -146,6 +145,7 @@ public class Unit extends RegisteredEntity {
                 }
             }
         });
+        onUpdate(dt -> prevPos.set(position.get()));
 
         Premade2D.makeSpriteGraphics(this, type.spriteName);
         add(Core.renderLayer(-.5).onEvent(() -> {

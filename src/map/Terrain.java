@@ -5,8 +5,8 @@
  */
 package map;
 
-import map.tiles.Tile;
 import map.tiles.HealthTile;
+import map.tiles.Tile;
 import util.Vec2;
 
 /**
@@ -64,10 +64,13 @@ public class Terrain {
     }
 
     public static boolean isSolid(Vec2 pos, Vec2 size) {
+        pos = pos.divide(Tile.RESOLUTION);
+        size = size.divide(Tile.RESOLUTION);
         for (int i = (int) (pos.x - size.x); i <= pos.x + size.x; i++) {
             for (int j = (int) (pos.y - size.y); j <= pos.y + size.y; j++) {
                 if (i < terrain.getWidth() && i >= 0 && j < terrain.getHeight() && j >= 0) {
                     if (terrain.terMap[i][j].getSpeed() == 0) {
+//                        System.out.println("solid");
                         return true;
                     }
                 }
