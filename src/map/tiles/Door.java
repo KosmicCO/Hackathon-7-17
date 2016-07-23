@@ -57,4 +57,9 @@ public class Door extends HealthTile{
         
         return spriteName;
     }
+
+    public void interact(int team) {
+
+        open = !open;
+    }
 }
