@@ -3,47 +3,53 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package map;
+package map.tiles;
+
+import game.interfaces.Health;
 
 /**
  *
  * @author Kosmic
  */
-public class HealthTile extends Tile{
+public class HealthTile extends Tile implements Health{
     
-    private int maxHealth;
-    private int health;
-    private Tile nhpTile;
+    protected int maxHealth;
+    protected int health;
+    protected Tile nhpTile;
     
-    public HealthTile(boolean solid, int maxHealth, int health, double speed, boolean opaque, double penetrability, String spriteName, Tile nhpTile) {
+    public HealthTile(int maxHealth, double speed, boolean opaque, double penetrability, String spriteName, Tile nhpTile) {
         
-        super(solid, speed, opaque, penetrability, spriteName);
+        super(speed, opaque, penetrability, spriteName);
         this.maxHealth = maxHealth;
-        this.health = health;
         this.nhpTile = nhpTile;
     }
-    
-    public void setMaxHealth(int maxHealth) {
 
-        this.maxHealth = maxHealth;
-    }
-
+    @Override
     public void setHealth(int health) {
 
         this.health = health;
     }
+
+    @Override
+    public void setMaxHealth(int hp) {
+
+        maxHealth = hp;
+    }
     
+    @Override
     public int getMaxHealth() {
 
         return maxHealth;
     }
 
+    @Override
     public int getHealth() {
 
         return health;
     }
     
-    public int health(int hp) {
+    @Override
+    public int takeDamage(int hp) {
 
         health += hp;
 

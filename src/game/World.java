@@ -9,7 +9,7 @@ import graphics.data.Texture;
 import graphics.loading.SpriteContainer;
 import java.util.Arrays;
 import map.Terrain;
-import map.Tile;
+import map.tiles.Tile;
 import map.generation.MapGen;
 import org.lwjgl.input.Keyboard;
 import static org.lwjgl.opengl.GL11.*;

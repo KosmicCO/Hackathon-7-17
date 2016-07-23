@@ -7,7 +7,7 @@ package map.generation;
 
 import java.util.Random;
 import map.Terrain;
-import map.Tile;
+import map.tiles.Tile;
 
 /**
  *
@@ -280,26 +280,26 @@ public class MapGen {
     }
 
     public static Tile roadTile() {
-        return new Tile(false, 1, false, 1, "road");
+        return new Tile(1, false, 1.2, "road");
     }
 
     public static Tile wallTile() {
-        return new Tile(true, 0, true, 0, "wall");
+        return new Tile(0, true, 0, "wall");
     }
 
     public static Tile grassTile() {
-        return new Tile(false, 1, false, 1, "grass");
+        return new Tile(1, false, 0.8, "grass");
     }
 
     public static Tile treeTile() {
-        return new Tile(true, 0, true, 0, "tree");
+        return new Tile(0, true, 0, "tree");
     }
 
     public static Tile sidewalkTile() {
-        return new Tile(false, 1, false, 1, "sidewalk");
+        return new Tile(1, false, 1.3, "sidewalk");
     }
 
     public static Tile borderTile() {
-        return new Tile(false, 1, false, 1, "border");
+        return new Tile(1, false, 1, "border");
     }
 }
