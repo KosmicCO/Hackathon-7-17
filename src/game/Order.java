@@ -99,7 +99,6 @@ public abstract class Order {
                     int width = dm.length;
                     int height = dm[0].length;
                     double ss = dm[(int) p.x][(int) p.y];
-                    Vec2 dir = null;
 
                     for (int i = 0; i < 8; i++) {
 
@@ -112,7 +111,6 @@ public abstract class Order {
                             if (ss > speed && speed > 0) {
 
                                 ss = speed;
-                                dir = adj.multiply(-1);
                             }
                         }
                     }
