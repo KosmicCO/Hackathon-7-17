@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package map;
+package map.tiles;
 
 /**
  *
@@ -13,15 +13,13 @@ public class Tile {
 
     public static final int RESOLUTION = 32;
 
-    private boolean solid;
-    private double speed;
-    private boolean opaque;
-    private double penetrability;
-    private String spriteName;
+    protected double speed;
+    protected boolean opaque;
+    protected double penetrability;
+    protected String spriteName;
     
-    public Tile(boolean solid, double speed, boolean opaque, double penetrability, String spriteName) {
+    public Tile(double speed, boolean opaque, double penetrability, String spriteName) {
 
-        this.solid = solid;
         this.speed = speed;
         this.opaque = opaque;
         this.penetrability = penetrability;
@@ -34,15 +32,10 @@ public class Tile {
         if(o instanceof Tile){
             
             Tile t = (Tile) o;
-            return t.solid == solid && t.speed == speed && t.opaque == opaque && t.penetrability == penetrability;
+            return t.speed == speed && t.opaque == opaque && t.penetrability == penetrability;
         }
         
         return false;
-    }
-
-    public boolean isSolid() {
-
-        return solid;
     }
 
     public double getSpeed() {
@@ -58,11 +51,6 @@ public class Tile {
     public double getPenetrability() {
 
         return penetrability;
-    }
-
-    public void setSolid(boolean solid) {
-
-        this.solid = solid;
     }
 
     public void setSpeed(double speed) {
@@ -88,5 +76,10 @@ public class Tile {
     public void setSpriteName(String spriteName) {
 
         this.spriteName = spriteName;
+    }
+    
+    public boolean isSolid(){
+        
+        return speed == 0;
     }
 }

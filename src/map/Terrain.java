@@ -5,6 +5,8 @@
  */
 package map;
 
+import map.tiles.Tile;
+import map.tiles.HealthTile;
 import util.Vec2;
 
 /**

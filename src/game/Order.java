@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import static map.Terrain.terrainVis;
-import map.Tile;
+import map.tiles.Tile;
 import networking.Client;
 import static networking.MessageType.UPDATE_UNIT_HEALTH;
 import static util.Color4.WHITE;
