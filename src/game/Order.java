@@ -74,6 +74,7 @@ public abstract class Order {
         public boolean executed;
 
         public MoveOrder(Unit u, Vec2 goal) {
+            
             super(u);
             this.goal = goal;
             executed = false;
@@ -87,9 +88,9 @@ public abstract class Order {
         @Override
         public void execute(double dt) {
             double[][] dm = GOALS.get(goal);
-            Vec2 p = u.position.get().divide(Tile.RESOLUTION);
             int width = dm.length;
             int height = dm[0].length;
+            Vec2 p = u.position.get().divide(Tile.RESOLUTION);
             double ss = dm[(int) p.x][(int) p.y];
             Vec2 best = null;
 
@@ -110,8 +111,9 @@ public abstract class Order {
             }
 
             if (best != null) {
-                best = best.multiply(Tile.RESOLUTION);
-                u.velocity.set(best.subtract(u.position.get()).withLength(u.type.moveSpeed));
+                best = best.add(new Vec2(0.5)).multiply(Tile.RESOLUTION);
+                
+                u.velocity.set(best.subtract(u.position.get()).withLength(u.type.moveSpeed * terrainVis.getSpeedMap()[(int) p.x][(int) p.y]));
             }
 
             aggressive();

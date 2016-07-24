@@ -280,7 +280,7 @@ public class MapGen {
     }
 
     public static Tile roadTile() {
-        return new Tile(1, false, 1.2, "road");
+        return new Tile(1.4, false, 1, "road");
     }
 
     public static Tile wallTile() {
@@ -288,7 +288,7 @@ public class MapGen {
     }
 
     public static Tile grassTile() {
-        return new Tile(1, false, 0.8, "grass");
+        return new Tile(0.9, false, 1, "grass");
     }
 
     public static Tile treeTile() {
@@ -296,7 +296,7 @@ public class MapGen {
     }
 
     public static Tile sidewalkTile() {
-        return new Tile(1, false, 1.3, "sidewalk");
+        return new Tile(1.2, false, 1, "sidewalk");
     }
 
     public static Tile borderTile() {

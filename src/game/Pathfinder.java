@@ -25,8 +25,19 @@ public class Pathfinder {
     private int height;
 
     public static void main(String[] args) {
-        Terrain t = (new MapGen(7392).generate(40, 40));
+        Terrain t = (new MapGen(373).generate(40, 40));
         double[][] speedMap = t.getSpeedMap();
+        
+        for (int i = 0; i < 20; i++) {
+            
+            for (int j = 0; j < 20; j++) {
+                
+                System.out.print(speedMap[i][j] + " ");
+            }
+            
+            System.out.println();
+        }
+        
         Pathfinder p = new Pathfinder(speedMap, new Vec2(10, 11));
         for (int j = 0; j < 20; j++) {
             for (int i = 0; i < 20; i++) {
@@ -69,7 +80,7 @@ public class Pathfinder {
 
             for (int j = 0; j < speedMap[0].length; j++) {
 
-                sm[i][j] = speedMap[i][j] > 0 ? 1 / speedMap[i][j] : Double.POSITIVE_INFINITY;
+                sm[i][j] = speedMap[i][j] > 0 ? 1.0 / speedMap[i][j] : Double.POSITIVE_INFINITY;
             }
         }
 
@@ -113,7 +124,7 @@ public class Pathfinder {
 
                     if (adj.x < width && adj.y < height && adj.x >= 0 && adj.y >= 0) {
 
-                        double speed = dm[(int) adj.x][(int) adj.y] ;
+                        double speed = dm[(int) adj.x][(int) adj.y];
                         
                         if(j % 2 == 0){
                             
