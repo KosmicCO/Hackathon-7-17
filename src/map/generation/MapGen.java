@@ -300,6 +300,6 @@ public class MapGen {
     }
 
     public static Tile borderTile() {
-        return new Tile(1, false, 1, "border");
+        return new Tile(0, false, 0, "border");
     }
 }

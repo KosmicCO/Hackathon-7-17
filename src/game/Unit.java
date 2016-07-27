@@ -6,6 +6,8 @@ import engine.Signal;
 import examples.Premade2D;
 import game.Order.IdleOrder;
 import graphics.Graphics2D;
+import graphics.data.Sprite;
+import static java.lang.Math.PI;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -27,12 +29,8 @@ public class Unit extends RegisteredEntity {
     public static boolean aggressive = true;
 
     public static List<Color4> teamColors = Arrays.asList(
-            new Color4(0, 0, 1),
-            new Color4(1, 0, 0),
-            new Color4(0, 1, 0),
-            new Color4(1, .75, 0),
-            new Color4(.75, 0, 1),
-            new Color4(0, 1, 1)
+            new Color4(1, 1, 0),
+            new Color4(.75, 0, 1)
     );
 
     static {
@@ -58,7 +56,7 @@ public class Unit extends RegisteredEntity {
             selected.clear();
             for (Unit u : RegisteredEntity.getAll(Unit.class)) {
                 if (u.unitTeam == myTeam) {
-                    if (Input.getMouse().containedBy(u.position.get().add(new Vec2(u.size)), u.position.get().subtract(new Vec2(u.size)))) {
+                    if (Input.getMouse().containedBy(u.position.get().add(new Vec2(u.type.size)), u.position.get().subtract(new Vec2(u.type.size)))) {
                         selected.add(u);
                         break;
                     }
@@ -70,7 +68,7 @@ public class Unit extends RegisteredEntity {
             Mutable<Unit> target = new Mutable(null);
             for (Unit u : RegisteredEntity.getAll(Unit.class)) {
                 if (u.unitTeam != myTeam) {
-                    if (Input.getMouse().containedBy(u.position.get().add(new Vec2(u.size)), u.position.get().subtract(new Vec2(u.size)))) {
+                    if (Input.getMouse().containedBy(u.position.get().add(new Vec2(u.type.size)), u.position.get().subtract(new Vec2(u.type.size)))) {
                         target.o = u;
                         break;
                     }
@@ -103,7 +101,6 @@ public class Unit extends RegisteredEntity {
     public Signal<Vec2> position, velocity;
     public Signal<Double> rotation;
     public Signal<Order> order = new Signal(new IdleOrder(this));
-    public double size = 10;
     public final UnitType type;
     public int unitTeam;
     public Signal<Integer> health = new Signal(null);
@@ -122,14 +119,26 @@ public class Unit extends RegisteredEntity {
         velocity = Premade2D.makeVelocity(this);
         rotation = Premade2D.makeRotation(this);
 
+        Sprite spriteFront = new Sprite(type.spriteName + "_front", type.frontFrames, 1);
+        Sprite spriteSide = new Sprite(type.spriteName + "_side", type.sideFrames, 1);
+        Sprite spriteBack = new Sprite(type.spriteName + "_back", type.backFrames, 1);
+        spriteFront.scale = new Vec2(type.scale);
+        spriteSide.scale = new Vec2(type.scale);
+        spriteBack.scale = new Vec2(type.scale);
         onUpdate(dt -> {
-            if (Terrain.isSolid(position.get(), new Vec2(size))) {
+            spriteFront.imageIndex += dt * 6;
+            spriteSide.imageIndex += dt * 6;
+            spriteBack.imageIndex += dt * 6;
+        });
+
+        onUpdate(dt -> {
+            if (!type.flying && Terrain.isSolid(position.get(), new Vec2(type.size))) {
                 int detail = 20;
                 Vec2 delta = position.get().subtract(prevPos.get()).divide(detail);
                 position.set(prevPos.get());
                 for (int i = 0; i < detail; i++) {
                     position.edit(delta.withY(0)::add);
-                    if (Terrain.isSolid(position.get(), new Vec2(size))) {
+                    if (Terrain.isSolid(position.get(), new Vec2(type.size))) {
                         position.edit(delta.withY(0).reverse()::add);
                         velocity.edit(v -> v.withX(0));
                         break;
@@ -137,7 +146,7 @@ public class Unit extends RegisteredEntity {
                 }
                 for (int i = 0; i < detail; i++) {
                     position.edit(delta.withX(0)::add);
-                    if (Terrain.isSolid(position.get(), new Vec2(size))) {
+                    if (Terrain.isSolid(position.get(), new Vec2(type.size))) {
                         position.edit(delta.withX(0).reverse()::add);
                         velocity.edit(v -> v.withY(0));
                         break;
@@ -147,17 +156,37 @@ public class Unit extends RegisteredEntity {
         });
         onUpdate(dt -> prevPos.set(position.get()));
 
-        Premade2D.makeSpriteGraphics(this, type.spriteName);
+//        Premade2D.makeSpriteGraphics(this, type.spriteName);
         add(Core.renderLayer(-.5).onEvent(() -> {
-            Graphics2D.fillEllipse(position.get(), new Vec2(size), teamColors.get(unitTeam).withA(.2), 20);
+            Graphics2D.fillEllipse(position.get(), new Vec2(type.size), teamColors.get(unitTeam).withA(.2), 20);
             if (selected.contains(this)) {
-                Graphics2D.drawEllipse(position.get(), new Vec2(size), WHITE, 20);
+                Graphics2D.drawEllipse(position.get(), new Vec2(type.size), WHITE, 20);
             }
+        }));
+        add(Core.renderLayer(0).onEvent(() -> {
+            if (velocity.get().lengthSquared() > 0) {
+                rotation.set(velocity.get().direction());
+            }
+            double rot = rotation.get();
+            Sprite spr;
+            if (rot >= -PI / 4 && rot < PI / 4) {
+                spr = spriteSide;
+                spr.scale = new Vec2(type.scale);
+            } else if (rot >= PI / 4 && rot < PI * 3 / 4) {
+                spr = spriteBack;
+            } else if (rot >= PI * 3 / 4 || rot < -PI * 3 / 4) {
+                spr = spriteSide;
+                spr.scale = new Vec2(-type.scale, type.scale);
+            } else { //else if (rot >= PI * 5 / 4 && rot < PI * 7 / 4) {
+                spr = spriteFront;
+            }
+            spr.draw(position.get(), 0);
+
         }));
         add(Core.renderLayer(1).onEvent(() -> {
             if (health.get() < type.maxHealth) {
-                Graphics2D.fillRect(position.get().subtract(new Vec2(size)), new Vec2(size * 2, size / 5), BLACK);
-                Graphics2D.fillRect(position.get().subtract(new Vec2(size)), new Vec2(size * 2 * Math.max(health.get(), 0) / type.maxHealth, size / 5), GREEN);
+                Graphics2D.fillRect(position.get().subtract(new Vec2(type.size)), new Vec2(type.size * 2, type.size / 5), BLACK);
+                Graphics2D.fillRect(position.get().subtract(new Vec2(type.size)), new Vec2(type.size * 2 * Math.max(health.get(), 0) / type.maxHealth, type.size / 5), GREEN);
             }
         }));
 
@@ -186,10 +215,10 @@ public class Unit extends RegisteredEntity {
             RegisteredEntity.getAll(Unit.class).forEach(other -> {
                 if (other != this && other.unitTeam == unitTeam) {
                     Vec2 diff = position.get().subtract(other.position.get()).reverse();
-                    if (diff.lengthSquared() < (size + other.size) * (size + other.size)) {//(sc.size + other.size) * (sc.size + other.size)) {
+                    if (diff.lengthSquared() < (type.size + other.type.size) * (type.size + other.type.size)) {//(sc.type.size + other.type.size) * (sc.type.size + other.type.size)) {
                         Vec2 diffN = diff.normalize();
                         if (velocity.get().dot(diffN) >= 0) {
-                            Vec2 change = diff.subtract(diffN.multiply(size + other.size)).multiply(.15);
+                            Vec2 change = diff.subtract(diffN.multiply(type.size + other.type.size)).multiply(.15);
                             position.edit(v -> v.add(change));
                             other.position.edit(v -> v.subtract(change));
                             other.velocity.edit(v -> v.subtract(change));

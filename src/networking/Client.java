@@ -7,6 +7,8 @@ import game.Order.IdleOrder;
 import game.Order.MoveOrder;
 import game.Unit;
 import game.UnitType;
+import static game.UnitType.BASIC_RANGED;
+import static game.UnitType.HELICOPTER;
 import game.World;
 import java.util.Arrays;
 import java.util.function.Consumer;
@@ -32,7 +34,10 @@ public abstract class Client {
         World.init();
 
         Input.whenKey(Keyboard.KEY_U, true).onEvent(()
-                -> sendMessage(CREATE_UNIT_CLIENT, UnitType.BASIC_RANGED));
+                -> sendMessage(CREATE_UNIT_CLIENT, BASIC_RANGED));
+
+        Input.whenKey(Keyboard.KEY_H, true).onEvent(()
+                -> sendMessage(CREATE_UNIT_CLIENT, HELICOPTER));
 
         Core.run();
 

@@ -44,7 +44,7 @@ public class Server {
     }
 
     private static void sendInitialData(ClientInfo client) {
-        sendTo(client, SET_CLIENT_TEAM, client.id);
+        sendTo(client, SET_CLIENT_TEAM, client.id % 2);
     }
 
     private static final List<ClientInfo> CLIENTS = new LinkedList();
