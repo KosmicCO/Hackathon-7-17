@@ -1,6 +1,8 @@
 package networking;
 
+import game.Unit;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -13,6 +15,8 @@ import util.Vec2;
 
 public class Server {
 
+    private static final List<Unit> units = new ArrayList();
+    
     public static void main(String[] args) throws IOException {
         NetworkUtils.server(conn -> {
             ClientInfo client = new ClientInfo(conn);
@@ -36,6 +40,7 @@ public class Server {
     private static void registerMessageHandlers(ClientInfo client) {
         handleMessage(client, CREATE_UNIT_CLIENT, data -> {
             int id = maxUnitID++;
+            units.add((Unit) data[0]);
             Vec2 pos = new Vec2(100 * 32, client.id % 2 == 0 ? 64 : 198 * 32);
             sendToAll(CREATE_UNIT, data[0], id, client.id, pos);
         });
